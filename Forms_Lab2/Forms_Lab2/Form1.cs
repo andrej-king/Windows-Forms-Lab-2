@@ -15,15 +15,27 @@ namespace Forms_Lab2
     public partial class Form1 : Form
     {
         private bool drawing;
+        public int historyCounter; // счетчик истории
+
         private GraphicsPath currentPath;
         private Point oldLocation;
-        private Pen currentPen;
+        public Pen currentPen;
+        private Color historyColor; // сохранение текущешл цвета перед использование ластика
+        private List<Image> History; // список для истории
+
+
+        private List<int> customColorsHistory; // история использованных цветов
 
         public Form1()
         {
             InitializeComponent();
             drawing = false; // переменная отвечает за рисование
             currentPen = new Pen(Color.Black);
+            currentPen.Width = trackBarPen.Value;
+            labelFontSizeNum.Text = trackBarPen.Value.ToString();
+            History = new List<Image>(); // инициализация списка для истории
+
+            customColorsHistory = new List<int>();
         }
 
         private void CreateNewFile(object sender, EventArgs e)
@@ -42,45 +54,71 @@ namespace Forms_Lab2
                 }
             }
 
+            // Очистка ненужной истории
+            History.Clear();
+            historyCounter = 0;
             Bitmap pic = new Bitmap(750, 500);
             picDrawingSurface.Image = pic;
             picDrawingSurface.BackColor = Color.White;
+            picDrawingSurface.BorderStyle = BorderStyle.Fixed3D;
+            History.Add(new Bitmap(picDrawingSurface.Image));
+
+            try
+            {
+                picDrawingSurface.Cursor = Cursors.Cross;
+            }
+            catch
+            {
+                picDrawingSurface.Cursor = Cursors.Default;
+            }
         }
 
         private void SaveFileAs(object sende, EventArgs e)
         {
-            SaveFileDialog SaveDlg = new SaveFileDialog();
-            SaveDlg.Filter = "JPEG Image|*.jpg|Bitmap Image|*.bmp|GIF Image|*.gif|PNG Image|*.png";
-            SaveDlg.Title = "Save an Image File";
-            SaveDlg.FilterIndex = 4; //По умолчанию будет выбрано последнее расширение *.png
-            SaveDlg.ShowDialog();
-
-            if (SaveDlg.FileName != "") // если введено не пустое имя
+            if (picDrawingSurface.Image == null)
             {
-                System.IO.FileStream fs = (System.IO.FileStream) SaveDlg.OpenFile();
+                MessageBox.Show("Сначала создайте новый файл");
+                return;
+            }
+            else
+            {
+                SaveFileDialog SaveDlg = new SaveFileDialog();
+                SaveDlg.Filter = "JPEG Image|*.jpg|Bitmap Image|*.bmp|GIF Image|*.gif|PNG Image|*.png";
+                SaveDlg.Title = "Save an Image File";
+                SaveDlg.FilterIndex = 4; //По умолчанию будет выбрано последнее расширение *.png
+                SaveDlg.ShowDialog();
 
-                switch (SaveDlg.FilterIndex)
+
+                if (SaveDlg.FileName != "") // если введено не пустое имя
                 {
-                    case 1:
-                        this.picDrawingSurface.Image.Save(fs, ImageFormat.Jpeg);
-                        break;
-                    case 2:
-                        this.picDrawingSurface.Image.Save(fs, ImageFormat.Bmp);
-                        break;
-                    case 3:
-                        this.picDrawingSurface.Image.Save(fs, ImageFormat.Gif);
-                        break;
-                    case 4:
-                        this.picDrawingSurface.Image.Save(fs, ImageFormat.Png);
-                        break;
-                }
+                    System.IO.FileStream fs = (System.IO.FileStream) SaveDlg.OpenFile();
 
-                fs.Close();
+                    switch (SaveDlg.FilterIndex)
+                    {
+                        case 1:
+                            this.picDrawingSurface.Image.Save(fs, ImageFormat.Jpeg);
+                            break;
+                        case 2:
+                            this.picDrawingSurface.Image.Save(fs, ImageFormat.Bmp);
+                            break;
+                        case 3:
+                            this.picDrawingSurface.Image.Save(fs, ImageFormat.Gif);
+                            break;
+                        case 4:
+                            this.picDrawingSurface.Image.Save(fs, ImageFormat.Png);
+                            break;
+                    }
+
+                    fs.Close();
+                }
             }
         }
 
+
         private void FileOpen(object sender, EventArgs e)
         {
+            CreateNewFile(sender, e);
+
             OpenFileDialog OP = new OpenFileDialog();
             OP.Filter = "JPEG Image|*.jpg|Bitmap Image|*.bmp|GIF Image|*.gif|PNG Image|*.png";
             OP.Title = "Open an Image File";
@@ -89,16 +127,107 @@ namespace Forms_Lab2
             // Когда пользователь укажет нужный путь картинки, ее нужно загрузить в PictureBox
             if (OP.ShowDialog() != DialogResult.Cancel) picDrawingSurface.Load(OP.FileName);
             picDrawingSurface.AutoSize = true;
+            picDrawingSurface.SizeMode = PictureBoxSizeMode.AutoSize;
         }
 
         private void EndProgramm(object sender, EventArgs e)
         {
             Application.Exit();
         }
-        
-        private void helpToolStripMenuItem_Click(object sender, EventArgs e)
+
+        private void ClickUndo(object sender, EventArgs e)
         {
-            // Help button
+            if (History.Count != 0 && historyCounter != 0)
+            {
+                picDrawingSurface.Image = new Bitmap(History[--historyCounter]);
+            }
+            else
+            {
+                MessageBox.Show("История пуста");
+            }
+        }
+
+        private void ClickRedo(object sender, EventArgs e)
+        {
+            if (historyCounter < History.Count - 1)
+            {
+                picDrawingSurface.Image = new Bitmap(History[++historyCounter]);
+            }
+            else
+            {
+                MessageBox.Show("История пуста");
+            }
+        }
+
+        private void PenStyleSolid(object sender, EventArgs e)
+        {
+            currentPen.DashStyle = DashStyle.Solid;
+
+            solidStyleMenu.Checked = true;
+            dotStyleMenu.Checked = false;
+            dashDotDotStyleMenu.Checked = false;
+        }
+
+        private void PenStyleDot(object sender, EventArgs e)
+        {
+            currentPen.DashStyle = DashStyle.Dot;
+
+            dotStyleMenu.Checked = true;
+            dashDotDotStyleMenu.Checked = false;
+            solidStyleMenu.Checked = false;
+        }
+
+        private void PenStyleDashDot(object sender, EventArgs e)
+        {
+            currentPen.DashStyle = DashStyle.DashDot;
+
+            dashDotDotStyleMenu.Checked = true;
+            dotStyleMenu.Checked = false;
+            solidStyleMenu.Checked = false;
+        }
+
+        private void ClickHelpMenu(object sender, EventArgs e)
+        {
+            MessageBox.Show("Mini Paint v1.0\nCreate by Pedchenko Andrii");
+        }
+
+        private int ColorToInt(Color color)
+        {
+            byte[] result = new byte[4];
+            result[0] = color.R;
+            result[1] = color.G;
+            result[2] = color.B;
+            return BitConverter.ToInt32(result, 0);
+        }
+
+        private void ColorPicker(object sender, EventArgs e)
+        {
+            ColorDialog colorDialog = new ColorDialog();
+
+
+            colorDialog.AllowFullOpen = true;
+            colorDialog.AnyColor = true;
+            colorDialog.SolidColorOnly = false;
+            colorDialog.Color = currentPen.Color;
+
+            if (customColorsHistory.Count != 0)
+            {
+                customColorsHistory.Reverse();
+                colorDialog.CustomColors = customColorsHistory.ToArray();
+            }
+
+
+            // Если список выбранных цветов не пустой, указать их в кастомном блоке
+            if (colorDialog.ShowDialog() == DialogResult.OK)
+            {
+                // при заполнении доп блока цветов, удалять тот что был в самом начале
+                if (customColorsHistory.Count == 16)
+                {
+                    customColorsHistory.RemoveAt(0);
+                }
+                customColorsHistory.Add(ColorToInt(colorDialog.Color));
+                currentPen.Color = colorDialog.Color;
+            }
         }
 
         private void picDrawingSurface_MouseDown(object sender, MouseEventArgs e)
@@ -114,22 +243,44 @@ namespace Forms_Lab2
                 drawing = true;
                 oldLocation = e.Location;
                 currentPath = new GraphicsPath();
+                historyColor = currentPen.Color;
+            }
+
+            if (e.Button == MouseButtons.Right)
+            {
+                currentPen.Color = Color.White;
+                drawing = true;
+                oldLocation = e.Location;
+                currentPath = new GraphicsPath();
             }
         }
 
 
         private void picDrawingSurface_MouseUp(object sender, MouseEventArgs e)
         {
+            // Очистка ненужной истории
+            History.RemoveRange(historyCounter + 1, History.Count - historyCounter - 1);
+            History.Add(new Bitmap(picDrawingSurface.Image));
+            if (historyCounter + 1 < 10) historyCounter++;
+            if (historyCounter - 1 == 10) History.RemoveAt(0);
+
             drawing = false;
+            currentPen.Color = historyColor;
             try
             {
                 currentPath.Dispose();
             }
-            catch {};
+            catch
+            {
+            }
+
+            ;
         }
 
         private void picDrawingSurface_MouseMove(object sender, MouseEventArgs e)
         {
+            label_XY.Text = e.X.ToString() + ", " + e.Y.ToString();
+
             if (drawing)
             {
                 Graphics g = Graphics.FromImage(picDrawingSurface.Image);
@@ -140,7 +291,11 @@ namespace Forms_Lab2
                 picDrawingSurface.Invalidate();
             }
         }
-        
-        // eraser
+
+        private void trackBarPen_Scroll(object sender, EventArgs e)
+        {
+            currentPen.Width = trackBarPen.Value;
+            labelFontSizeNum.Text = trackBarPen.Value.ToString();
+        }
     }
 }
