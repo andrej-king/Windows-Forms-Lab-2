@@ -1,0 +1,9 @@
+D:\Google Drive\C_Sharp\Study\23.03.2020\Windows-Forms-Lab-2\Forms_Lab2\Forms_Lab2\bin\Debug\Forms_Lab2.exe.config
+D:\Google Drive\C_Sharp\Study\23.03.2020\Windows-Forms-Lab-2\Forms_Lab2\Forms_Lab2\bin\Debug\Forms_Lab2.exe
+D:\Google Drive\C_Sharp\Study\23.03.2020\Windows-Forms-Lab-2\Forms_Lab2\Forms_Lab2\bin\Debug\Forms_Lab2.pdb
+D:\Google Drive\C_Sharp\Study\23.03.2020\Windows-Forms-Lab-2\Forms_Lab2\Forms_Lab2\obj\Debug\Forms_Lab2.csprojAssemblyReference.cache
+D:\Google Drive\C_Sharp\Study\23.03.2020\Windows-Forms-Lab-2\Forms_Lab2\Forms_Lab2\obj\Debug\Forms_Lab2.Properties.Resources.resources
+D:\Google Drive\C_Sharp\Study\23.03.2020\Windows-Forms-Lab-2\Forms_Lab2\Forms_Lab2\obj\Debug\Forms_Lab2.csproj.GenerateResource.cache
+D:\Google Drive\C_Sharp\Study\23.03.2020\Windows-Forms-Lab-2\Forms_Lab2\Forms_Lab2\obj\Debug\Forms_Lab2.exe
+D:\Google Drive\C_Sharp\Study\23.03.2020\Windows-Forms-Lab-2\Forms_Lab2\Forms_Lab2\obj\Debug\Forms_Lab2.pdb
+D:\Google Drive\C_Sharp\Study\23.03.2020\Windows-Forms-Lab-2\Forms_Lab2\Forms_Lab2\obj\Debug\Forms_Lab2.Form1.resources
